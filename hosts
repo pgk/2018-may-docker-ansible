@@ -1,0 +1,7 @@
+[docker]
+<host1> ansible_user=<user1>
+<host2> ansible_user=<user2>
+<host3> ansible_user=<user3>
+
+[docker:vars]
+ansible_python_interpreter=/usr/bin/python3

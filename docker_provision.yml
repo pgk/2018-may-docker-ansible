@@ -1,0 +1,59 @@
+- hosts: docker
+  become: yes
+  tasks:
+    - name: Ensure docker dependencies.
+      apt:
+        name: "{{ item }}"
+        state: present
+      with_items:
+        - apt-transport-https
+        - ca-certificates
+        - curl
+        - gnupg2
+        - software-properties-common
+        - python3-pip
+
+    - name: add docker key
+      shell: "curl -fsSL https://download.docker.com/linux/debian/gpg | apt-key add -"
+      register: key_added
+      failed_when: "key_added.rc > 0"
+
+    - name: check we got the right one
+      shell: "apt-key fingerprint 0EBFCD88"
+      register: key_valid
+      failed_when: "key_valid.rc > 0"
+
+    - name: add repo
+      apt_repository:
+        repo: "deb [arch=amd64] https://download.docker.com/linux/debian stretch stable"
+        state: present
+
+    - name: install docker
+      apt:
+        name: docker-ce
+        state: present
+        update_cache: yes
+
+    - name: rsync the app
+      synchronize:
+        src: wee_app
+        dest: /var/html/
+    - name: docker pip
+      pip:
+        name: docker
+
+    - name: pull python image
+      docker_image:
+        name: frolvlad/alpine-python3
+
+    - name: Build image
+      docker_image:
+        path: /var/html/wee_app
+        name: wee_app
+
+    - name: Start container
+      docker_container:
+        name: wee_app1
+        image: wee_app
+        ports:
+          - "5000:5000"
