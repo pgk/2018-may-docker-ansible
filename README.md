@@ -3,4 +3,4 @@
 Note: assumes your remote servers are debian 9.
 
 First, add your hosts and remote users to `hosts`
-to run, do `make env` and then `make deploy`
+Then, to run, `make env` and then `make deploy`
